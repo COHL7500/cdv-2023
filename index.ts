@@ -1,161 +1,226 @@
-// type (could be interface as well) for birthday entries
-type birthdayEntry = {
-    name: string,
-    age: number,
-    month: number,
-    day: number
-}
+// Goal: map data onto coordinates, shapes and work with color.
+// Learn to load and handle external files of data.
 
-const entryAmount = 20
-
-const birthdayData: birthdayEntry[] = Array(entryAmount);
-
-// set the dimensions and margins of the graph
-const margin = {top: 10, right: 10, bottom: 50, left: 60},
-    width = 650 - margin.left - margin.right,
-    height = 650 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-const svg: d3.Selection<SVGElement, any, HTMLElement, any> = d3.select("#canvas")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-const months: number[] = d3.range(1, 13);
-const days: number[] = d3.range(1, 32);
-
-// Build X scales and axis:
-const x = d3.scaleBand()
-    .range([ 0, width])
-    .domain(months.map(String))
-
-/*
-svg.append("g")
-    .attr("transform", "translate(0," + (height + 2) + ")")
-    .call(d3.axisBottom(x));
-
- */
-const y = d3.scaleBand()
-    .range([height, 0])
-    .domain(days.map(String))
-
-/*
-svg.append("g")
-    .call(d3.axisLeft(y));
- */
-
-for (let i = 0; i < entryAmount; i++) {
-        birthdayData[i] = randomBirthdayEntry()
-    }
-
-    /*
-    [
-    {name: "Roger", age: 19, month: 7, day: 13},
-    {name: "Michale", age: 33, month: 5, day: 1},
-    {name: "Bastjan", age: 100, month: 9, day: 21},
-    {name: "Baby Man", age: 0, month: 3, day: 2},
-    {name: "Middle Age Man", age: 50, month: 2, day: 2},
-    {name: "Richard Richardson", age: 69, month: 12, day: 24},
-    {name: "Laetitia Sadier", age: 22, month: 4, day: 1}
-]
-     */
-
-function randomBirthdayEntry(): birthdayEntry {
-    return {name: "Test", age: randomAge(), month: randomMonth(), day: randomDay()}
-}
-
-function randomRange(min, max): number { // min and max included
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function randomAge(): number {
-    return randomRange(0, 100);
-}
-
-function randomMonth(): number {
-    return randomRange(1, 12);
-}
-
-function randomDay(): number {
-    return randomRange(1, 31);
-}
-
-svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("transform", "rotate(-90)")
-    .attr("y", -margin.left + 20)
-    .attr("x", -height / 2)
-    .text("Day")
-
-svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("y", height + margin.top + 35)
-    .attr("x", width / 2)
-    .text("Month")
-
-// Creation of the tooltip
-
-const tooltip: d3.Selection<HTMLDivElement, any, HTMLElement, any> = d3.select("#canvas")
-    .append("div")
-    .style("opacity", 0)
-    .attr("class", "tooltip")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
-    .style("position", "absolute")
-    .style("max-width", "200px")
-
-const onMouseOver = function() {
-    tooltip.style("opacity", 1)
-}
-
-const onMouseMove = function (event: any, d: birthdayEntry) {
-    tooltip
-        .html("Name: " + d.name + "<br>Age: " + d.age)
-        .style("left", (d3.pointer(event)[0] + 100) + "px")
-        .style("top", (d3.pointer(event)[1]) + "px")
-}
-
-const onMouseLeave = function() {
-    tooltip.style("opacity", 0)
-}
+const w = 1000;
+const h = 700;
+const rad = 10;
+const margin = rad*4;
 
 
-// Make a grey grid for the heatmap
-const gridGroup = svg.append("g")
-months.forEach(function(m) {
-    days.forEach(function(d) {
-        gridGroup.append("rect")
-            .attr("x", x(String(m)))
-            .attr("y", y(String(d)))
-            .attr("width", x.bandwidth())
-            .attr("height", y.bandwidth())
-            .style("stroke", "#ececec")
-            .style("fill", "none");
-    });
-});
+var svg = d3.select("svg")
+    .attr("width",w)
+    .attr("height",h)
+    .style("background-color","black")
 
-// from age of 0 to 100, go from green to red.
+//1. LINEAR SCALES
+// var arrData = [100, 40, 80, 70, 100, 90, 90, 100, 1];
+// var xScale = d3.scaleLinear()
+// 				.domain([0, 100])
+// 				.range([margin, w-margin]);
+// svg
+// 	.selectAll('circle')
+// 	.data(arrData)
+// 	.join('circle')
+// 	.attr('cx', function(d,i){
+// 		return xScale(d);
+// 	})
+// 	.attr('cy', h/2)
+// 	.attr('r', rad)
+// 	.attr('fill', 'none')
+// 	.attr('stroke','white')
 
-const ageRangeColor = d3.scaleLinear<string, number>()
-    .range(["#2bcc2b", "#FF0000"])
-    .domain([0, 100])
 
-// Creation of birthday rectangles
-svg.selectAll()
-    .data(birthdayData)
-    .enter()
-    .append("rect")
-    .attr("x", d => x(String(d.month)) )
-    .attr("y", d => y(String(d.day)) )
-    .attr("width", x.bandwidth())
-    .attr("height", y.bandwidth())
-    .style("fill", d => ageRangeColor(d.age))
-    .on("mouseover", onMouseOver)
-    .on("mousemove", onMouseMove)
-    .on("mouseleave", onMouseLeave);
+
+
+
+
+//2. CATEGORICAL DATA -> COLORS = ORDINAL SCALES
+// var arrData = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday","monday","tuesday"];
+// var colScale = d3.scaleOrdinal()
+// 				.domain(arrData)
+// 				.range(["red", "green", "blue","yellow", "orange", "purple","teal"])
+//   				// .range(d3.schemePaired);
+
+// svg
+// 	.selectAll('circle')
+// 	.data(arrData)
+// 	.join('circle')
+// 	.attr('cx', function(d,i){
+// 		return i*(rad*2);
+// 	})
+// 	.attr('cy', h/2)
+// 	.attr('r', rad)
+// 	.attr('fill', function(d){
+// 			return colScale(d);
+// 		})
+// 	.attr('stroke','white')
+
+
+
+
+
+
+//3. CATEGORICAL DATA -> POSITIONS = SCALE BAND
+// var arrData = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday","monday","tuesday"];
+// var xScale = d3.scaleBand()
+// 				.domain(arrData)
+// 				.range([margin, w-margin]);
+// svg
+// 	.selectAll('circle')
+// 	.data(arrData)
+// 	.join('circle')
+// 	.attr('cx', function(d,i){
+// 		return xScale(d);
+// 	})
+// 	.attr('cy', h/2)
+// 	.attr('r', rad)
+// 	.attr('fill', 'none')
+// 	.attr('stroke','white')
+
+
+
+
+
+
+//4. MIN AND MAX OF DATA TO DRIVE THE SCALE'S DOMAIN EFFICIENTLY
+// var arrData = [100, 40, 80, 70, 100, 90, 90, 100, 1];
+// var min = d3.min(arrData)
+// var max = d3.max(arrData)
+// var radScale = d3.scaleLinear()
+// 	.domain([min, max])
+// 	.range([10, 20])
+// svg
+// 	.selectAll('circle')
+// 	.data(arrData)
+// 	.join('circle')
+// 	.attr('cx', w/2)
+// 	.attr('cy', h/2)
+// 	.attr('r', function(d){
+// 		return radScale(d);
+// 	})
+// 	.attr('fill', 'none')
+// 	.attr('stroke','white')
+
+
+
+
+
+
+//5. DATA OBJECTS -> SCALES
+// var skyData = [
+// 	{"day":"monday", "sky":100},
+// 	{"day":"tuesday", "sky":40},
+// 	{"day":"wednesday", "sky":80},
+// 	{"day":"thursday", "sky":70},
+// 	{"day":"friday", "sky":100},
+// 	{"day":"saturday", "sky":90},
+// 	{"day":"sunday", "sky":90},
+// 	{"day":"monday", "sky":100},
+// 	{"day":"tuesday", "sky":1}
+// ];
+
+// //CLASSIC JAVASCRIPT
+// var days = [];
+// getDays();
+// function getDays(){
+// 	for (var i = 0; i<skyData.length; i++){
+// 		days.push(skyData[i].day);
+// 	}
+// }
+// var dayScale = d3.scaleBand()
+// 	.domain(days)
+// 	.range([margin, w-margin]);
+
+// var minSky = d3.min(skyData, function(d){
+// 	return d.sky;
+// })
+// var maxSky = d3.max(skyData, function(d){
+// 	return d.sky;
+// })
+
+// var colScale = d3.scaleLinear()
+// 	.domain([minSky, maxSky])
+// 	.range(d3.schemeTableau10)
+// 	// .range(d3.schemePaired);
+// 	// .range([0,255])
+
+// var skyCirc = svg.selectAll("circle")
+// 	.data(skyData)
+// 	.join("circle")
+// 	.attr("cx", function(d,i){
+// 		return dayScale(d.day)
+// 	})
+// 	.attr("cy", h/2)
+// 	.attr("r", 10)
+// 	.attr("fill",function(d){
+// 		console.log(colScale(d.sky))
+// 		return colScale(d.sky)
+// 	})
+// 	// .attr("fill", function(d){
+// 	// 	return 'rgb(0,0,'+colScale(d.sky)+')'
+// 	// })
+
+
+
+
+
+
+////INITIAL DATA OBJECT FOR REFERENCE
+//// var skyData = [
+//// 	{"day":"monday", "cloudCov":100},
+//// 	{"day":"tuesday", "cloudCov":40},
+//// 	{"day":"wednesday", "cloudCov":80}
+//// ];
+
+// var skyData = [];
+// d3.json("skyData.json")
+// 	.then(function(data) {
+//     	skyData = data;
+//     	draw();
+//   	});
+
+// function draw(){
+// 	var min = d3.min(skyData, function(d){
+// 		return d.cloudCov;
+// 	});
+// 	var max = d3.max(skyData, function(d){
+// 		return d.cloudCov;
+// 	});
+
+// 	var days = [];
+// 	getSky();
+// 	function getSky(){
+// 		for (var i = 0; i<skyData.length; i++){
+// 			days.push(skyData[i].day);
+// 		}
+// 	}
+// 	var xScale = d3.scaleBand()
+// 					.domain(days)
+// 					.range([margin, w-margin]);
+
+// 	var yScale = d3.scaleLinear()
+// 					.domain([0, 6])
+// 					.range([h/3, h/3+100])
+
+
+// 	var clScale = d3.scaleLinear()
+// 					.domain([min, max])
+// 					.range(["lightblue","blue"]);
+
+// 	var skyRects = svg
+// 		.selectAll('rect')
+// 		.data(skyData)
+// 		.join('rect')
+// 		.attr('x', function(d){
+// 			return xScale(d.day);
+// 		})
+// 		.attr('y', function(d,i){
+// 			// console.log(Math.floor(i / 7))
+// 			return yScale(Math.floor(i / 7))
+// 		})
+// 		.attr('width', rad)
+// 		.attr('height', rad)
+// 		.attr('fill', function(d){
+// 			return clScale(d.cloudCov)
+// 		})
+// }
