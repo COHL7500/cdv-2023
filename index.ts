@@ -9,13 +9,43 @@ type birthdayEntry = {
     day: number
 }
 
-const birthdayData: {name: string, age: number, month: number, day: number}[] = [
+const birthdayData: birthdayEntry[] = Array(10);
+
+for (let i = 0; i < 10; i++) {
+        birthdayData[i] = randomBirthdayEntry()
+    }
+
+    /*
+    [
     {name: "Roger", age: 19, month: 7, day: 13},
     {name: "Michale", age: 33, month: 5, day: 1},
     {name: "Bastjan", age: 100, month: 9, day: 21},
-    {name: "Baby Man", age: 0, month: 3, day: 2}
-
+    {name: "Baby Man", age: 0, month: 3, day: 2},
+    {name: "Middle Age Man", age: 50, month: 2, day: 2},
+    {name: "Richard Richardson", age: 69, month: 12, day: 24},
+    {name: "Laetitia Sadier", age: 22, month: 4, day: 1}
 ]
+     */
+
+function randomBirthdayEntry(): birthdayEntry {
+    return {name: "Test", age: randomAge(), month: randomMonth(), day: randomDay()}
+}
+
+function randomRange(min, max): number { // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function randomAge(): number {
+    return randomRange(0, 100);
+}
+
+function randomMonth(): number {
+    return randomRange(1, 12);
+}
+
+function randomDay(): number {
+    return randomRange(1, 31);
+}
 
 // set the dimensions and margins of the graph
 const margin = {top: 10, right: 10, bottom: 50, left: 60},
@@ -23,7 +53,7 @@ const margin = {top: 10, right: 10, bottom: 50, left: 60},
     height = 650 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-const svg = d3.select("#canvas")
+const svg: d3.Selection<SVGElement, any, HTMLElement, any> = d3.select("#canvas")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -31,8 +61,8 @@ const svg = d3.select("#canvas")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
 
-const months = d3.range(1, 13);
-const days = d3.range(1, 32);
+const months: number[] = d3.range(1, 13);
+const days: number[] = d3.range(1, 32);
 
 svg.append("text")
     .attr("text-anchor", "end")
