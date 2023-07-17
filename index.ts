@@ -1,6 +1,3 @@
-//GOAL: can we move shapes around based on their data?
-// Can we store more information inside every data piece aside from just numbers?
-
 // type (could be interface as well) for birthday entries
 type birthdayEntry = {
     name: string,
@@ -9,9 +6,48 @@ type birthdayEntry = {
     day: number
 }
 
-const birthdayData: birthdayEntry[] = Array(10);
+const entryAmount = 20
 
-for (let i = 0; i < 10; i++) {
+const birthdayData: birthdayEntry[] = Array(entryAmount);
+
+// set the dimensions and margins of the graph
+const margin = {top: 10, right: 10, bottom: 50, left: 60},
+    width = 650 - margin.left - margin.right,
+    height = 650 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+const svg: d3.Selection<SVGElement, any, HTMLElement, any> = d3.select("#canvas")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+const months: number[] = d3.range(1, 13);
+const days: number[] = d3.range(1, 32);
+
+// Build X scales and axis:
+const x = d3.scaleBand()
+    .range([ 0, width])
+    .domain(months.map(String))
+
+/*
+svg.append("g")
+    .attr("transform", "translate(0," + (height + 2) + ")")
+    .call(d3.axisBottom(x));
+
+ */
+const y = d3.scaleBand()
+    .range([height, 0])
+    .domain(days.map(String))
+
+/*
+svg.append("g")
+    .call(d3.axisLeft(y));
+ */
+
+for (let i = 0; i < entryAmount; i++) {
         birthdayData[i] = randomBirthdayEntry()
     }
 
@@ -47,23 +83,6 @@ function randomDay(): number {
     return randomRange(1, 31);
 }
 
-// set the dimensions and margins of the graph
-const margin = {top: 10, right: 10, bottom: 50, left: 60},
-    width = 650 - margin.left - margin.right,
-    height = 650 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-const svg: d3.Selection<SVGElement, any, HTMLElement, any> = d3.select("#canvas")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-const months: number[] = d3.range(1, 13);
-const days: number[] = d3.range(1, 32);
-
 svg.append("text")
     .attr("text-anchor", "end")
     .attr("transform", "rotate(-90)")
@@ -77,23 +96,9 @@ svg.append("text")
     .attr("x", width / 2)
     .text("Month")
 
-// Build X scales and axis:
-const x = d3.scaleBand()
-    .range([ 0, width])
-    .domain(months.map(String))
-svg.append("g")
-    .attr("transform", "translate(0," + (height + 2) + ")")
-    .call(d3.axisBottom(x));
-
-const y = d3.scaleBand()
-    .range([height, 0])
-    .domain(days.map(String))
-svg.append("g")
-    .call(d3.axisLeft(y));
-
 // Creation of the tooltip
 
-const tooltip = d3.select("#canvas")
+const tooltip: d3.Selection<HTMLDivElement, any, HTMLElement, any> = d3.select("#canvas")
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip")
