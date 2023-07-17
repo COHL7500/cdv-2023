@@ -6,11 +6,43 @@ const h = 700;
 const rad = 10;
 const margin = rad*4;
 
+type skyEntry = {day: string, cloudCov: number}
 
-const svg = d3.select("svg")
+const svg = d3.select("#canvas")
+    .append("svg")
     .attr("width",w)
     .attr("height",h)
     .style("background-color","black")
+
+
+let skyData: skyEntry[] = [];
+
+const minClouds = d3.min(skyData, d => d.cloudCov);
+const maxClouds = d3.max(skyData, d => d.cloudCov);
+
+const cloudColor = d3.scaleLinear()
+    .domain([minClouds, maxClouds])
+    // @ts-ignore
+    .range(["blue", "white"])
+
+d3.json("skyData.json")
+    .then(function(data) {
+        // @ts-ignore
+        skyData = data;
+        draw();
+    })
+
+function draw() {
+    console.log("spaghetti milk")
+
+    const cloudCircles = svg.selectAll("circle")
+        .data(skyData)
+        .join("circle")
+        .attr("cx", w/2)
+        .attr("cy", h/2)
+        .attr("fill", d => d.cloudCov)
+        .attr("r",  10)
+}
 
 //1. LINEAR SCALES
 // var arrData = [100, 40, 80, 70, 100, 90, 90, 100, 1];
@@ -28,11 +60,6 @@ const svg = d3.select("svg")
 // 	.attr('r', rad)
 // 	.attr('fill', 'none')
 // 	.attr('stroke','white')
-
-
-
-
-
 
 //2. CATEGORICAL DATA -> COLORS = ORDINAL SCALES
 // var arrData = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday","monday","tuesday"];
@@ -101,23 +128,20 @@ const svg = d3.select("svg")
 // 	.attr('fill', 'none')
 // 	.attr('stroke','white')
 
-
-
-
-
-
+/*
 //5. DATA OBJECTS -> SCALES
-// var skyData = [
-// 	{"day":"monday", "sky":100},
-// 	{"day":"tuesday", "sky":40},
-// 	{"day":"wednesday", "sky":80},
-// 	{"day":"thursday", "sky":70},
-// 	{"day":"friday", "sky":100},
-// 	{"day":"saturday", "sky":90},
-// 	{"day":"sunday", "sky":90},
-// 	{"day":"monday", "sky":100},
-// 	{"day":"tuesday", "sky":1}
-// ];
+const skyData: skyEntry[] = [
+ 	{"day":"monday", "sky":100},
+ 	{"day":"tuesday", "sky":40},
+ 	{"day":"wednesday", "sky":80},
+ 	{"day":"thursday", "sky":70},
+ 	{"day":"friday", "sky":100},
+ 	{"day":"saturday", "sky":90},
+ 	{"day":"sunday", "sky":90},
+ 	{"day":"monday", "sky":100},
+ 	{"day":"tuesday", "sky":1}
+ ];
+ */
 
 // //CLASSIC JAVASCRIPT
 // var days = [];
