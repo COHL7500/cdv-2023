@@ -7,7 +7,7 @@ const rad = 10;
 const margin = rad*4;
 
 
-var svg = d3.select("svg")
+const svg = d3.select("svg")
     .attr("width",w)
     .attr("height",h)
     .style("background-color","black")
