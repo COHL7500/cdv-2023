@@ -1,0 +1,22 @@
+#canvas {
+  .svg {
+    .explain-text {
+      font-family: "Arial", "sans-serif";
+      font-style: italic;
+    }
+    .graph-text {
+      font-family: "Arial", "sans-serif";
+    }
+  }
+
+  .tooltip {
+    opacity: 0;
+    font-family: "Arial", "sans-serif";
+    background-color: white;
+    border: 2px solid;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    max-width: 200px;
+  }
+}
